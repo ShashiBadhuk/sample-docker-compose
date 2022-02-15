@@ -1,0 +1,67 @@
+version: '3.1'
+
+services:
+  
+  redis-master:
+    image: bitnami/redis:latest
+    container_name: redis-master
+    restart: always
+    volumes:
+      - ./data:/bitnami/redis/data
+      # - ./redis/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
+      - ./config/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=admin
+      # - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - 6379:6379
+    networks:
+      - redis-app-tier
+  
+  redis-slave:
+    image: 'bitnami/redis:latest'
+    container_name: redis-slave
+    restart: always
+    environment:
+      - REDIS_REPLICATION_MODE=slave
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PASSWORD=admin
+      - REDIS_PASSWORD=admin
+    ports:
+      - '6379'
+    depends_on:
+      - redis-master
+    networks:
+      - redis-app-tier
+
+  redis-sentinel:
+    image: 'bitnami/redis-sentinel:latest'
+    restart: always
+    environment:
+      - REDIS_MASTER_HOST=redis-master
+      - REDIS_MASTER_PASSWORD=admin
+      - SENTINEL_DOWN_AFTER=5000
+      - SENTINEL_FAILOVER=5000
+    depends_on:
+      - redis-master
+      - redis-slave
+    ports:
+      - '26379'
+    networks:
+      - redis-app-tier
+    
+    # docker-compose up --scale redis-sentinel=3 -d
+
+  redis-ui:
+    image: patrikx3/p3x-redis-ui:latest
+    ports:
+        - 7843:7843
+    volumes:
+       - ./p3x-redis-ui-settings:/settings
+    networks:
+      - redis-app-tier
+
+networks:
+  redis-app-tier:
+    driver: bridge

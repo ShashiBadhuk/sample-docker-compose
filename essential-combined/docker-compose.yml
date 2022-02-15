@@ -1,0 +1,78 @@
+version: '3.1'
+
+services:
+  
+  mysql-server:
+    image: mysql:latest
+    container_name: local-mysql-server
+    command: '--default-authentication-plugin=mysql_native_password'
+    restart: always
+    volumes:
+      - ./mysql/mysql-data:/var/lib/mysql
+      - ./mysql/conf.d:/etc/mysql/conf.d
+    environment:
+      - MYSQL_ROOT_HOST=%
+      - MYSQL_DATABASE=test
+      - MYSQL_ROOT_USERNAME=root
+      - MYSQL_ROOT_PASSWORD=root
+    ports:
+      - 3306:3306
+  
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: local-phpmyadmin-app
+    links:
+      - db
+    environment:
+      PMA_HOST: db
+      PMA_PORT: 3306
+      PMA_ARBITRARY: 1
+    restart: always
+    ports:
+      - 8081:80
+  
+  postgres:
+    image: postgres:latest
+    container_name: local-postgres-server
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres #optional (specify default database instead of $POSTGRES_USER)
+    ports:
+      - "5432:5432"
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: local-pgadmin-app
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=shashi1517@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - "5050:80"
+    restart: always
+
+  redis-server:
+    image: bitnami/redis:latest
+    container_name: local-redis-server
+    restart: always
+    volumes:
+      - ./redis/data:/bitnami/redis/data
+      # - ./redis/redis.conf:/opt/bitnami/redis/mounted-etc/redis.conf
+      - ./redis/config/overrides.conf:/opt/bitnami/redis/mounted-etc/overrides.conf
+    environment:
+      - REDIS_REPLICATION_MODE=master
+      - REDIS_PASSWORD=root
+      # - REDIS_DISABLE_COMMANDS=FLUSHDB,FLUSHALL
+    ports:
+      - 6379:6379
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: local-rabbitmq-server
+    ports:
+        - 5672:5672
+        - 15672:15672
+    volumes:
+        - ./rabbitmq/data/:/var/lib/rabbitmq/
+        - ./rabbitmq/log/:/var/log/rabbitmq

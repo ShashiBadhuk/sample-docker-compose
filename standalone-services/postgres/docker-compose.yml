@@ -1,0 +1,23 @@
+version: '3.1'
+
+services:
+  postgres:
+    image: postgres:latest
+    container_name: local-postgres-server
+    environment:
+      - POSTGRES_USER=root
+      - POSTGRES_PASSWORD=root
+      - POSTGRES_DB=postgres #optional (specify default database instead of $POSTGRES_USER)
+    ports:
+      - "5432:5432"
+    restart: always
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: local-pgadmin-app
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=shashi1517@gmail.com
+      - PGADMIN_DEFAULT_PASSWORD=root
+    ports:
+      - "5050:80"
+    restart: always

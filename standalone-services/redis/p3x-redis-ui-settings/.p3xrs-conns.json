@@ -1,0 +1,16 @@
+{
+    "update": "2022-02-15T20:21:29.999Z",
+    "list": [
+        {
+            "name": "localdev",
+            "host": "redis-master",
+            "port": 6379,
+            "id": "P3Xid866cb0ffe7101000c67268a138b903",
+            "tlsWithoutCert": false,
+            "tlsRejectUnauthorized": true,
+            "cluster": false,
+            "nodes": [],
+            "password": "admin"
+        }
+    ]
+}
